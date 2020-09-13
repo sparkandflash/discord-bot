@@ -85,26 +85,6 @@ class Chat(commands.Cog, name='Chat'):
         for i in range(len(items[1:])):
             await message.add_reaction(reactions[i])
 
-    @commands.command(brief='!twitch [game] [words]', description='Search for streams on twitch')
-    async def twitch(self, ctx, game, *keys, streams=[]):
-        headers = {
-            'Accept': 'application/vnd.twitchtv.v5+json',
-            'Client-ID': environ['TWITCH_CLIENT'],
-            'Authorization': f"Bearer {environ['TWITCH_TOKEN']}",
-        }
-        category = get(f'https://api.twitch.tv/kraken/search/games?query={game}', headers=headers).json()['games'][0]
-        embed = Embed(title=f":desktop: Streams ({category['name']}):", color=0x3498db)
-        response = get(f"https://api.twitch.tv/helix/streams?game_id={category['_id']}", headers=headers).json()
-        for stream in response['data']:
-            if keys:
-                for key in keys:
-                    if key.lower() in stream['title'].lower() and not stream in streams:
-                        streams.append(stream)
-                        embed.add_field(name=f"{stream['user_name']}", value=f"[{stream['title']}](https://twitch.tv/{stream['user_name']})")
-            else:
-                embed.add_field(name=f"{stream['user_name']}", value=f"[{stream['title']}](https://twitch.tv/{stream['user_name']})")
-        await ctx.send(embed=embed)
-
     @commands.command(brief='!profile [member]', description="Display member's profile")
     async def profile(self, ctx, member: Member):
         with connect('data.db') as conn:
